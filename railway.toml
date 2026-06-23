@@ -1,2 +1,0 @@
-[deploy]
-startCommand = "python carpet_cleaning_bot.py"
