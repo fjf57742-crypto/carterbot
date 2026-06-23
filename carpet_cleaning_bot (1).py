@@ -24,7 +24,11 @@ from telegram.ext import (
 )
 
 BOT_TOKEN = os.environ["BOT_TOKEN"]
-ADMIN_CHAT_ID = int(os.environ.get("ADMIN_CHAT_ID", "7286678108"))
+ADMIN_CHAT_IDS = [
+    int(cid.strip())
+    for cid in os.environ.get("ADMIN_CHAT_ID", "7286678108").split(",")
+    if cid.strip()
+]
 
 OFFICE_LAT = 40.881278
 OFFICE_LON = 71.151750
@@ -373,18 +377,19 @@ async def get_name(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         f"Jami: {total:,} som"
     )
 
-    try:
-        await context.bot.send_message(
-            chat_id=ADMIN_CHAT_ID,
-            text=admin_msg,
-        )
-        await context.bot.send_location(
-            chat_id=ADMIN_CHAT_ID,
-            latitude=d["lat"],
-            longitude=d["lon"],
-        )
-    except Exception as e:
-        logging.error(f"Admin xabari yuborilmadi: {e}")
+    for admin_id in ADMIN_CHAT_IDS:
+        try:
+            await context.bot.send_message(
+                chat_id=admin_id,
+                text=admin_msg,
+            )
+            await context.bot.send_location(
+                chat_id=admin_id,
+                latitude=d["lat"],
+                longitude=d["lon"],
+            )
+        except Exception as e:
+            logging.error(f"Admin xabari yuborilmadi ({admin_id}): {e}")
 
     return ConversationHandler.END
 
